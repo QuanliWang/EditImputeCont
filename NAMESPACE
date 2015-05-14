@@ -1,0 +1,4 @@
+useDynLib(EditImputeCont)
+exportPattern("^[[:alpha:]]+")
+import(Rcpp)
+exportClasses(Rcpp_bei)

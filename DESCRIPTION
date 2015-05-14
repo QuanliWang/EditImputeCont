@@ -1,0 +1,13 @@
+Package: EditImputeCont
+Type: Package
+Title: Simultaneous Edit-Imputation for Continuous Microdata
+Version: 6.4.5
+Date: 2015-01-27
+Author: Quanli Wang, Hang J. Kim, Jerome P. Reiter, Lawrence H. Cox and Alan F. Karr
+Maintainer: Quanli Wang <quanli@stat.duke.edu>
+Description: enable initilization for D_initial and S_initial to the code
+License: GPL(>= 3)
+Depends: Rcpp (>= 0.11.1)
+LinkingTo: Rcpp
+RcppModules: cbei
+Packaged: 2015-05-05 14:16:14 UTC; quanli
