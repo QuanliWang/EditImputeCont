@@ -1,6 +1,5 @@
 #ifndef CompleteAnalysis_Gibbs
 #define CompleteAnalysis_Gibbs
-
 #include <cstdio> 
 #include <cstdlib>
 #include <cmath> 

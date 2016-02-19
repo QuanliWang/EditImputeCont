@@ -20,7 +20,7 @@
 
 
 #include "myexcept.h"                  // for exception handling
-
+#include <R.h>
 #ifdef use_namespace
 namespace RBD_COMMON {
 #endif
@@ -108,9 +108,9 @@ void BaseException::AddInt(int value)
 
 void Tracer::PrintTrace()
 {
-   cout << "\n";
-   for (Tracer* et = last; et; et=et->previous)
-      cout << "  * " << et->entry << "\n";
+   //cout << "\n";
+   //for (Tracer* et = last; et; et=et->previous)
+   //   cout << "  * " << et->entry << "\n";
 }
 
 void Tracer::AddTrace()
@@ -137,14 +137,14 @@ Janitor::Janitor()
    {
       do_not_link = false; NextJanitor = 0; OnStack = false;
 #ifdef CLEAN_LIST
-      cout << "Not added to clean-list " << (unsigned long)this << "\n";
+      //cout << "Not added to clean-list " << (unsigned long)this << "\n";
 #endif
    }
    else
    {
       OnStack = true;
 #ifdef CLEAN_LIST
-      cout << "Add to       clean-list " << (unsigned long)this << "\n";
+     // cout << "Add to       clean-list " << (unsigned long)this << "\n";
 #endif
       NextJanitor = JumpBase::jl->janitor; JumpBase::jl->janitor=this;
    }
@@ -224,11 +224,12 @@ Tracer* Tracer::last;               // will be set to zero
 
 
 void Terminate()
-{
-   cout << "\n\nThere has been an exception with no handler - exiting";
-   const char* what = BaseException::what();
-   if (what) cout << what << "\n";
-   exit(1);
+{ 
+	//does not work with R, disable it for now, as it rarely happens
+   //cout << "\n\nThere has been an exception with no handler - exiting";
+   //const char* what = BaseException::what();
+   //if (what) cout << what << "\n";
+   // exit(1);
 }
 
 
@@ -251,44 +252,46 @@ FreeCheckLink* FreeCheck::next;
 int FreeCheck::BadDelete;
 
 void FCLClass::Report()
-{ cout << "   " << ClassName << "   " << (unsigned long)ClassStore << "\n"; }
+{ 
+	//cout << "   " << ClassName << "   " << (unsigned long)ClassStore << "\n";
+}
 
 void FCLRealArray::Report()
 {
-   cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
-      "   " << size << "\n";
+   //cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
+   //   "   " << size << "\n";
 }
 
 void FCLIntArray::Report()
 {
-   cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
-      "   " << size << "\n";
+   //cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
+   //   "   " << size << "\n";
 }
 
 void FreeCheck::Register(void* t, char* name)
 {
-   FCLClass* f = new FCLClass(t,name);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+   //FCLClass* f = new FCLClass(t,name);
+   //if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
 #ifdef REG_DEREG
-   cout << "Registering   " << name << "   " << (unsigned long)t << "\n";
+   //cout << "Registering   " << name << "   " << (unsigned long)t << "\n";
 #endif
 }
 
 void FreeCheck::RegisterR(void* t, char* o, int s)
 {
-   FCLRealArray* f = new FCLRealArray(t,o,s);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+   //FCLRealArray* f = new FCLRealArray(t,o,s);
+   //if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+  // cout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
 }
 
 void FreeCheck::RegisterI(void* t, char* o, int s)
 {
-   FCLIntArray* f = new FCLIntArray(t,o,s);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+  // FCLIntArray* f = new FCLIntArray(t,o,s);
+  // if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+  // cout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
 }
 

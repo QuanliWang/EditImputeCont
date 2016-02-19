@@ -1,5 +1,4 @@
-
-#include <ctime>
+#include "CHeader.h"  
 #include <Rcpp.h>
 #include <R_ext/Utils.h>
 #include "CData.h" 
@@ -15,41 +14,43 @@ RCPP_MODULE(cbei){
 	class_<CBE>( "bei" )
     // expose the default constructor
     .constructor<Rcpp::NumericMatrix, Rcpp::NumericMatrix, Rcpp::NumericMatrix, int, int>()
-    .method("InitlizeSandD", &CBE::InitlizeSandD, "Generate initial S and D matrix" )
-    .method("SetInitialSandD", &CBE::SetInitialSandD, "Set initial S and D matrix" )
-    .method("SetTrueS", &CBE::SetTrueS, "Set true S matrix" )
+    .method("InitializeSandD", &CBE::InitializeSandD, "Generate initial S and D matrix" )
+    // .method("SetInitialSandD", &CBE::SetInitialSandD, "Set initial S and D matrix" )
+    // .method("SetTrueS", &CBE::SetTrueS, "Set true S matrix" )
     .method("Iterate", &CBE::Iterate, "Run one iteration of MCMC algorithm" )
     .method("Run", &CBE::Run, "Run MCMC algorithm for given times" )
-    .method("Test", &CBE::test, "bug catcher" )
+    // .method("Test", &CBE::test, "bug catcher" )
     .method("BuildFeasibilityMap", &CBE::BuildMap, "Build Feasibility Map" )
     //.method("SetOptionalData", &CBE::SetOptionalData, "Set Optional Data" )
     .method("Simulate_logUnif_case2", &CBE::Simulate_logUnif_case2, "Simulate logUnif values for case 2" )
     .property("RandomSeed", &CBE::GetRandomSeed, &CBE::SetRandomSeed, "Random Seed")
     .property("msg.level", &CBE::GetMsgLevel, &CBE::SetMsgLevel, "Message Level")
-    .property("useMap", &CBE::GetUseMap, &CBE::SetUseMap, "Use Map")
-    .property("S.Compact.Initial", &CBE::Get_initialS_Compact, "Initial S matrix")
-    .property("Log.Uniform.Compact", &CBE::Get_logUnif_Compact, &CBE::SetS_logUnif_Compact, "log uniform for case 2 matrix")
-    .property("D.Initial", &CBE::GetD,"D matrix")
-    .property("K", &CBE::GetK, &CBE::SetK, "Number of components")
-    .property("FeasibilityMap", &CBE::Get_FeasibilityMap, &CBE::Set_FeasibilityMap, "Feasibility map matrix")
-    .property( "ImputedX.Compact", &CBE::GetX_compact, "Retrieve compact version of the imputed data matrix" )
-    .property( "ImputedX", &CBE::GetX, "Retrieve complete version of the imputed data matrix" )
-    .property( "S.Compact", &CBE::GetS_compact, "S compact matrix" )
-    .property( "alpha", &CBE::GetAlpha, "alpha" )
-    .property( "Phi", &CBE::GetPhi, "Phi" )
-    .property( "Sigma", &CBE::GetSigma, "Sigma" )
-    .property( "Mu", &CBE::GetMu, "Mu" )
-    .property( "Pi", &CBE::GetPi, "Pi" )
-    .property( "Z", &CBE::GetZ, "Z" )
-    .property( "NZ", &CBE::GetNZ, "NZ" )
-    .property( "Accept", &CBE::GetAccept, "is_accept" )
+    // .property("useMap", &CBE::GetUseMap, &CBE::SetUseMap, "Use Map")
+		.property("S.Compact.Initial", &CBE::Get_initialS_Compact, "Initial S matrix")
+		// .property("Log.Uniform.Compact", &CBE::Get_logUnif_Compact, &CBE::SetS_logUnif_Compact, "log uniform for case 2 matrix")
+		.property("D.Initial", &CBE::GetD,"D matrix")
+		.method("K", &CBE::GetK, "Number of components")
+    // .property("K", &CBE::GetK, &CBE::SetK, "Number of components")
+    // .property("FeasibilityMap", &CBE::Get_FeasibilityMap, &CBE::Set_FeasibilityMap, "Feasibility map matrix")
+		// .property( "ImputedX.Compact", &CBE::GetX_compact, "Retrieve compact version of the imputed data matrix" )
+    .property( "Y.edited", &CBE::GetX, "Retrieve complete version of the imputed data matrix" )
+		// .property( "S.Compact", &CBE::GetS_compact, "S compact matrix" )
+    // .property( "alpha", &CBE::GetAlpha, "alpha" )
+		// .property( "Phi", &CBE::GetPhi, "Phi" )
+    // .property( "Sigma", &CBE::GetSigma, "Sigma" )
+    // .property( "Mu", &CBE::GetMu, "Mu" )
+    // .property( "Pi", &CBE::GetPi, "Pi" )
+    // .property( "Z", &CBE::GetZ, "Z" )
+		.property( "n.occ", &CBE::GetNZ, "n.occ" )
+    // .property( "Accept", &CBE::GetAccept, "is_accept" )
     .property( "Prob.A", &CBE::GetProb_A, "Prob_A" )
-    .property( "FaultyIndex", &CBE::GetFaultyIndex, "Faulty record index" )
-    .property( "DrawFindS", &CBE::GetDrawFindS, "Draw Find S" )
+		.property( "FaultyRecordID", &CBE::GetFaultyIndex, "Faulty record ID's" )
+    // .property( "DrawFindS", &CBE::GetDrawFindS, "Draw Find S" )
+    .property( "Y.input", &CBE::GetDobs, "Y.input" )
   ;
 }       
 
-CBE::CBE(Rcpp::NumericMatrix X_, Rcpp::NumericMatrix Edit_, Rcpp::NumericMatrix logB_,int nbalance_edit, int K) {
+CBE::CBE(Rcpp::NumericMatrix X_, Rcpp::NumericMatrix Edit_, Rcpp::NumericMatrix logB_, int nbalance_edit, int K) {
   Matrix D_obs = Rcpp2Mat2(X_);
   Matrix Edit = Rcpp2Mat2(Edit_);
   Matrix logB = Rcpp2Mat2(logB_);
@@ -57,8 +58,11 @@ CBE::CBE(Rcpp::NumericMatrix X_, Rcpp::NumericMatrix Edit_, Rcpp::NumericMatrix 
   Data.SetData(D_obs,Edit,logB,nbalance_edit);
   Data.init();
   
-  srand (time(NULL));
-  randseed = (float)((double)rand() / RAND_MAX); //to use double only later once verified
+  //srand (time(NULL));
+  GetRNGstate();
+  randseed = (float)unif_rand(); //to use double only later once verified
+  //randseed = (float)((double)rand() / RAND_MAX); //to use double only later once verified
+  PutRNGstate();
   urng = new MotherOfAll(randseed);
   Random::Set(*urng);
   randUnif = new Uniform;
@@ -71,7 +75,8 @@ CBE::CBE(Rcpp::NumericMatrix X_, Rcpp::NumericMatrix Edit_, Rcpp::NumericMatrix 
   is_feasiblity_Map_initilized = false;;
   is_log_unif_initilized = false;
   IterCount = 0;
-  useMap = false;
+	useMap = true;
+  // useMap = false; // memory error if this is false when using large dataset
 }
 /*
 CBE::CBE(Rcpp::NumericMatrix X_, Rcpp::NumericMatrix Edit_, Rcpp::NumericMatrix logB_,
@@ -124,9 +129,11 @@ void CBE::SetOptionalData(Rcpp::List OData) { //testing code
   //double tolerance     = Rcpp::as<double>(OData["tolerance"]);
 }
 
-void CBE::test() {
-  FM.test(Data);
-}
+// Commented on 05/21/2015
+// void CBE::test() {
+//   FM.test(Data);
+// }
+
 void CBE::SetUseMap(bool use) {
   useMap = use;
 }
@@ -135,13 +142,21 @@ bool CBE::GetUseMap() {
 }
 void CBE::BuildMap() {
   if (is_log_unif_initilized) {
-    cout << "BuildFeasibilityMap must be called before Simulate_logUnif_case2" << endl;
+	Rprintf( "BuildFeasibilityMap must be called before Simulate_logUnif_case2.\n");
     return;
   }
-	cout << "useMap" << endl ; 
+	
+	if ( Param.msg_level > 0 )	{
+		Rprintf( "useMap\n");
+	}
   FM.useMap = useMap;
-	cout << "FM.Build" << endl ; 
+	if ( Param.msg_level > 0 )	{
+		Rprintf( "FM.Build\n");
+	}
   FM.Build(Data);
+	if ( Param.msg_level > 0)	{
+		Rprintf( "end.FM.Build\n");
+	}
   is_feasiblity_Map_initilized = true;
 }
 
@@ -153,23 +168,25 @@ void CBE::Iterate() {
     IterCount++;
     Param.iterate(IterCount, Data, FM, hyper, *randUnif,100);
   } else {
-    cout << "Model was not initilized properly" << endl;
+	Rprintf( "Model was not initilized properly\n");
   }
 }
 
 void CBE::Run(int iter) {
+	
   if (!is_log_unif_initilized) {
     Simulate_logUnif_case2(100);
   }
+
   if (is_log_unif_initilized) {
     for (int i = 1; i <= iter; i++) {
       IterCount++;
-      cout<< "iter: " <<  i << ".Total iter:" <<IterCount << endl;
       Param.iterate(IterCount, Data, FM, hyper, *randUnif,100);
     }
   } else {
-    cout << "Model was not initilized properly" << endl;
+	Rprintf( "Model was not initilized properly\n");
   }
+
 }
 
 void CBE::SetK(int ncomp) {
@@ -177,7 +194,7 @@ void CBE::SetK(int ncomp) {
     Param.K = -ncomp; //record the number but delay the inilization 
   } else {
     if (Param.K != ncomp) {
-      cout << "re-initilizing number of components to " << ncomp << endl;
+	  Rprintf( "re-initilizing number of components to %d\n", ncomp);
       Param.initizalize(Data,ncomp,FM, *randUnif,100);
     }
   }
@@ -197,7 +214,7 @@ int CBE::GetMsgLevel() {
 
 void CBE::SetS_logUnif_Compact(Rcpp::NumericMatrix X_) { //merge code with Simulate_logUnif_case2 later
   if (!is_S_and_D_initilized) {
-    InitlizeSandD();
+    InitializeSandD();
   }
   if (is_S_and_D_initilized) {
     if (!is_feasiblity_Map_initilized) {
@@ -214,7 +231,7 @@ void CBE::SetS_logUnif_Compact(Rcpp::NumericMatrix X_) { //merge code with Simul
 
 void CBE::Simulate_logUnif_case2(int nsim) {
   if (!is_S_and_D_initilized) {
-    InitlizeSandD();
+    InitializeSandD();
   }
   if (is_S_and_D_initilized) {
     if (!is_feasiblity_Map_initilized) {
@@ -234,7 +251,7 @@ Rcpp::NumericMatrix CBE::Get_FeasibilityMap() {
 
 void CBE::Set_FeasibilityMap(Rcpp::NumericMatrix X_) { //check dim later
   if (is_log_unif_initilized) {
-    cout << "FeasibilityMap must be set before Simulate_logUnif_case2" << endl;
+	Rprintf( "FeasibilityMap must be set before Simulate_logUnif_case2\n");
     return;
   }
   FM.feasibleMap = Rcpp2Mat(X_);
@@ -374,7 +391,7 @@ double CBE::GetProb_A() {
 
 void CBE::SetInitialSandD(Rcpp::NumericMatrix S_, Rcpp::NumericMatrix D_) {
   if (is_log_unif_initilized) {
-    cout << "InitlizeSandD must be called before Simulate_logUnif_case2" << endl;
+	Rprintf( "InitializeSandD must be called before Simulate_logUnif_case2\n");
     return;
   }
   Set_initialS(S_);
@@ -407,15 +424,15 @@ void CBE::SetD(Rcpp::NumericMatrix X_) {
   }
 }
 
-void CBE::InitlizeSandD() {
+void CBE::InitializeSandD() {
   if (is_log_unif_initilized) {
-    cout << "InitlizeSandD must be called before Simulate_logUnif_case2" << endl;
+	Rprintf( "InitializeSandD must be called before Simulate_logUnif_case2\n");
     return;
   }
   FM.initilize_D_and_S(Data);
   if (!Data.InitialRecordValid()) {
     Data.initial_S_Mat = 0; //reset to zeros
-    cout <<"Initial values can not be found!" << endl;
+	Rprintf( "Initial values can not be found!\n");
     return;
   }
   is_S_and_D_initilized = true;
@@ -441,7 +458,10 @@ int CBE::GetDrawFindS() {
   if (Data.has_trueS) {
     return Data.count_Draw_find_s(Param.S_Mat);
   } else {
-    //cout << "True S matrix was not provided" << endl;
     return -1;
   }
+}
+
+Rcpp::NumericMatrix CBE::GetDobs() {
+  return Mat2Rcpp(Data.D_Observed);
 }

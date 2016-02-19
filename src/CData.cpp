@@ -1,8 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-using namespace std;
 #include "CHeader.h"  
+#include "R.h"
 #include "CData.h"
 
 CData::CData() {
@@ -15,25 +12,28 @@ CData::CData() {
   Debug = false;
   
 }
-CData::CData(string folder){
-  has_initialValue = true;
-  //read in data from files
-  data_folder = folder;
-  ReadData();
-  init();
-  //read in optional data if any
-  ReadOptionalData();
-}
 
-void CData::init(string folder){
-  has_initialValue = true;
-  //read in data from files
-  data_folder = folder;
-  ReadData();
-  init();
-  //read in optional data if any
-  ReadOptionalData();
-}
+// Commented on 05/21/2015
+// CData::CData(string folder){		
+//   has_initialValue = true;
+//   //read in data from files
+//   data_folder = folder;
+//   ReadData();
+//   init();
+//   //read in optional data if any
+//   ReadOptionalData();
+// }
+
+// Commented on 05/21/2015
+// void CData::init(string folder){
+//   has_initialValue = true;
+//   //read in data from files
+//   data_folder = folder;
+//   ReadData();
+//   init();
+//   //read in optional data if any
+//   ReadOptionalData();
+// }
 
 
 //Destructor
@@ -75,40 +75,43 @@ void CData::SetData(Matrix &X_, Matrix &Edit_, Matrix &LogB_, int n_blanceedit) 
   n_tau = pow(2,n_var)-2;
 }
 
-bool CData::ReadData() {
-  ReadDimInfo();
-  Matrix Edit = ReadMatrix("Edit.txt",n_EditVec,n_var + 1);
-  EditMat = Edit.columns(1,n_var);
-  EditVec = Edit.column(n_var + 1);
-  
-  Matrix logB = ReadMatrix("logB.txt",n_var,2);
-  logB_L = logB.column(1);
-  logB_U = logB.column(2);
-  logB_U_L = logB_U - logB_L;
-  log_logB_U_L = log_ColumnVector(logB_U_L);
-  
-  D_Observed = ReadMatrix("D_obs.txt",n_sample,n_var);
-  return true;
-}
-bool CData::ReadOptionalData() {
-  has_trueS = true;
-  try {
-    True_S_Mat = ReadMatrix("True_S_Mat.dat",n_faulty,n_var).t();//optional?!
-  } catch (...) {
-    has_trueS = false;
-  }  
-  if (has_initialValue) {
-    //initilize intial imputed data for records
-    D_initial = D_Observed; 
-    Matrix temp = ReadMatrix("D_initial.dat",n_faulty,n_var);
-    for (int i = 1; i <= n_faulty; i++ ) {
-      D_initial.row(Faulty2Original[i-1]) = temp.row(i);
-    }
-    // for faulty values, import its initial values from R
-    initial_S_Mat = ReadMatrix("S_initial.dat",n_faulty,n_var);
-  }
-  return true;
-}
+// Commented on 05/21/2015
+// bool CData::ReadData() {
+//   ReadDimInfo();
+//   Matrix Edit = ReadMatrix("Edit.txt",n_EditVec,n_var + 1);
+//   EditMat = Edit.columns(1,n_var);
+//   EditVec = Edit.column(n_var + 1);
+//
+//   Matrix logB = ReadMatrix("logB.txt",n_var,2);
+//   logB_L = logB.column(1);
+//   logB_U = logB.column(2);
+//   logB_U_L = logB_U - logB_L;
+//   log_logB_U_L = log_ColumnVector(logB_U_L);
+//
+//   D_Observed = ReadMatrix("D_obs.txt",n_sample,n_var);
+//   return true;
+// }
+
+// Commented on 05/21/2015
+// bool CData::ReadOptionalData() {
+//   has_trueS = true;
+//   try {
+//     True_S_Mat = ReadMatrix("True_S_Mat.dat",n_faulty,n_var).t();//optional?!
+//   } catch (...) {
+//     has_trueS = false;
+//   }
+//   if (has_initialValue) {
+//     //initilize intial imputed data for records
+//     D_initial = D_Observed;
+//     Matrix temp = ReadMatrix("D_initial.dat",n_faulty,n_var);
+//     for (int i = 1; i <= n_faulty; i++ ) {
+//       D_initial.row(Faulty2Original[i-1]) = temp.row(i);
+//     }
+//     // for faulty values, import its initial values from R
+//     initial_S_Mat = ReadMatrix("S_initial.dat",n_faulty,n_var);
+//   }
+//   return true;
+// }
 
 int CData::get_feasible_tau(ColumnVector &s) {
   int skip_for_infeasible_type2 = 0;
@@ -217,7 +220,8 @@ void CData::initilize_balance_edits() {
 	
     }  else {
       //should be checked long before here, but just in case
-      cout << "Balance Edit " << be << "not recognized" << endl; 
+	  Rprintf( "Balance Edit %d  not recognized\n", be);
+      //cout << "Balance Edit " << be << " not recognized" << endl; 
     }
       
   }
@@ -582,17 +586,18 @@ bool CData::InitialRecordValid( ) {
     if (!PassEdits(x_i)) {
       ret = false;
       ColumnVector mat_Ratio_check = RatioEditMat * x_i - RatioEditVec ;  
-      printf("Error: edit-fail, initilized record \n") ;
-      printf(" i = %d", i_sample );
-      printf(", ratio = %.7f ", mat_Ratio_check.maximum());
+	  Rprintf( "Error: edit-fail, initilized record\n");
+      
+	  Rprintf( " i = %d , ratio = %g \n",i_sample,   mat_Ratio_check.maximum());
+      //cout << " i = " << i_sample << ", ratio = " << mat_Ratio_check.maximum() << endl ;
       for (int be = 1; be <= n_balance_edit; be++) {
         double temp_diff = x_i(BalanceEdits[be-1](1)) * BalanceEdits_coeff[be-1](1) ; // MODIFIED 2/2/2015
         for (int j = 2; j <= BalanceEdits[be-1].nrows(); j++) {
           temp_diff += x_i(BalanceEdits[be-1](j)) * BalanceEdits_coeff[be-1](j) ; // MODIFIED 2/2/2015
         }
-        printf(", diff%d = %.7f ", be, temp_diff);
+		Rprintf( "diff = %d = %g\n",be,   temp_diff);
       }
-      cout << x_i.t() << endl ;
+      //cout << x_i.t() << endl ; //need to put this line in later on
     }  
   }  
   return ret;

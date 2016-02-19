@@ -1,86 +1,102 @@
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+#include "CHeader.h" 
 #include "lp_lib.h"
-using namespace std;
 
 #include "CData.h"
 #include "CFeasibilityMap.h"
+#include "R.h"
+
 MapManager::MapManager(CData &Data):data(Data) {  
+		
 	iter = 0;	
 	last_trim.resize(data.n_faulty + 1);
 	for (int i = 0; i < data.n_faulty + 1; i++) {
 	  last_trim[i] = 1;
 	}
+	
 	map_feasible_tau_t.resize(data.n_faulty + 1);
 	
 	last_trim_fn2.resize(data.n_faulty + 1);
 	for (int i = 0; i < data.n_faulty + 1; i++) {
 	  last_trim_fn2[i] = 1;
 	}
+		
 	map_count_x_out.resize(data.n_faulty + 1);
+
 }
+
 //Constructor
 CFeasibilityMap::CFeasibilityMap(){
-   Debug = false;
-   useMap = false;
-   pmm = NULL;
+  Debug = false;
+ 	useMap = true;
+  // useMap = false; // memory error if this is false when using large dataset
+	pmm = NULL;
 }
 
 //Destructor
 CFeasibilityMap::~CFeasibilityMap(){}
 
 void CFeasibilityMap::Build(CData &Data) {
+	
   if (useMap) {
+		
     if (pmm!=NULL) {
       delete pmm; pmm=NULL;
     }
     pmm = new MapManager(Data);
+		
   } else {
-    feasibleMap = Matrix(Data.n_tau,Data.n_faulty); 
+    
+		feasibleMap = Matrix(Data.n_tau,Data.n_faulty); 
     for (int i_faulty=1; i_faulty<=Data.n_faulty; i_faulty++){
+						
       int i_original = Data.Faulty2Original[i_faulty-1];
+			
       ColumnVector x_tilde_i = (Data.D_Observed.row(i_original)).t(); 
-      for (int i_tau=1; i_tau<=Data.n_tau; i_tau++){
-        ColumnVector s_i = tau_to_s_fn(i_tau,Data.n_var);
-        feasibleMap(i_tau,i_faulty) = feasible_test_fn(Data, x_tilde_i, s_i, i_original,Data.epsilon) ;
-       } 
+			
+      for (int i_tau=1; i_tau<=Data.n_tau; i_tau++){			
+       ColumnVector s_i = tau_to_s_fn(i_tau,Data.n_var);
+			 feasibleMap(i_tau,i_faulty) = feasible_test_fn(Data, x_tilde_i, s_i, i_original, Data.epsilon) ;
+	    } 
+			 
       if ( ((1.0*i_faulty/100)==(floor(1.0*i_faulty/100))) ){ 
-        printf("Mat_feasible_tau_t for i_sample= %d \n", i_faulty) ;  
+		Rprintf( "Mat_feasible_tau_t for i_sample= %d\n",i_faulty);
   	  }	
-    } 
-  }
-}
-
-int CFeasibilityMap::feasible_test_fn(CData &Data, ColumnVector &x_tilde_i, 
-    ColumnVector &s_i, int i_original,float epsilon) {
-    ColumnVector Dummy;
-    return feasible_test_fn(Data,x_tilde_i, s_i, i_original, false,epsilon, Dummy);
-}
-
-void CFeasibilityMap::test(CData &Data) {
-  int i_original = 519;
-  ColumnVector s_i(Data.n_var); s_i = 0;
-  s_i(4) = 1;s_i(5) = 1; s_i(6) = 1;
-  s_i(7) = 1;s_i(8) = 1; s_i(9) = 1;
-  s_i(10) = 1;s_i(11) = 1;
-  s_i(15) = 1;
-  s_i(16) = 1;s_i(18) = 1; 
-  s_i(19) = 1;
-  s_i(22) = 1;s_i(23) = 1; s_i(24) = 1;
-  s_i(26) = 1;s_i(27) = 1; 
-  cout << " start testing..." << endl;
-  try {
-    ColumnVector x_tilde_i = (pmm->data.D_Observed.row(i_original)).t() ;    // defined in mm
-    cout << x_tilde_i;
-    cout << s_i;
-    test_feasible_test_fn(Data, x_tilde_i, s_i);
-  } catch (...) {
-    cout << "oops" << endl;
-  }
+    
+		} // for (int i_faulty=1; i_faulty<=Data.n_faulty; i_faulty++)  
   
-  cout << "Done test" << endl;
+	} // if (useMap) {...} else {
+	
+} // void CFeasibilityMap::Build
+
+int CFeasibilityMap::feasible_test_fn(CData &Data, ColumnVector &x_tilde_i, ColumnVector &s_i, int i_original, float epsilon) {
+    ColumnVector Dummy;
+    return feasible_test_fn(Data, x_tilde_i, s_i, i_original, false, epsilon, Dummy);
 }
+
+// Commented on 05/21/2015
+// void CFeasibilityMap::test(CData &Data) {
+//   int i_original = 519;
+//   ColumnVector s_i(Data.n_var); s_i = 0;
+//   s_i(4) = 1;s_i(5) = 1; s_i(6) = 1;
+//   s_i(7) = 1;s_i(8) = 1; s_i(9) = 1;
+//   s_i(10) = 1;s_i(11) = 1;
+//   s_i(15) = 1;
+//   s_i(16) = 1;s_i(18) = 1;
+//   s_i(19) = 1;
+//   s_i(22) = 1;s_i(23) = 1; s_i(24) = 1;
+//   s_i(26) = 1;s_i(27) = 1;
+//   cout << " start testing..." << endl;
+//   try {
+//     ColumnVector x_tilde_i = (pmm->data.D_Observed.row(i_original)).t() ;    // defined in mm
+//     cout << x_tilde_i;
+//     cout << s_i;
+//     test_feasible_test_fn(Data, x_tilde_i, s_i);
+//   } catch (...) {
+//     cout << "oops" << endl;
+//   }
+//
+//   cout << "Done test" << endl;
+// }
 
 int CFeasibilityMap::isCandidateFeasible(ColumnVector &cand_s, int i_faulty) {
   // This function gives 0 for infeasible solution s_i
@@ -255,9 +271,12 @@ int CFeasibilityMap::feasible_test_fn(CData &Data, ColumnVector &x_tilde_i,
 
 
 void CFeasibilityMap::initilize_D_and_S(CData &Data) {
+	
   ColumnVector order_to_test = get_order_to_test(Data.n_tau, Data.n_var);
   ColumnVector list_feasible_type2 = get_feasible_tau(Data);
+	
 	for (int i_faulty = 1; i_faulty <= Data.n_faulty; i_faulty++) {  
+		
     bool is_pass = false;
     int i_original = Data.Faulty2Original[i_faulty-1];
     ColumnVector x_tilde_i = (Data.D_Observed.row(i_original)).t(); 
@@ -269,7 +288,7 @@ void CFeasibilityMap::initilize_D_and_S(CData &Data) {
       if (Data.is_case(i_original,2) && list_feasible_type2(i_tau) == 0) { skip_for_type2 = true;}
       if (!skip_for_type2){
         ColumnVector x_mean;
-        int is_feasible = feasible_test_fn(Data, x_tilde_i, s_i, i_original,true, Data.epsilon, x_mean);
+        int is_feasible = feasible_test_fn(Data, x_tilde_i, s_i, i_original, true, Data.epsilon, x_mean);
         
         if (is_feasible > 0) {
           //copy solution to a temp vector
@@ -290,7 +309,9 @@ void CFeasibilityMap::initilize_D_and_S(CData &Data) {
         Debug = false;
       }
     } 
-  }  
+  
+	}  
+	
 }
 
 bool CFeasibilityMap::SolveLP(Matrix &A, ColumnVector &b, ColumnVector &x) {
@@ -298,21 +319,24 @@ bool CFeasibilityMap::SolveLP(Matrix &A, ColumnVector &b, ColumnVector &x) {
   int n_row = A.nrows(); int n_col = A.ncols();
   x = ColumnVector(n_col); x = 0;
   lp = make_lp(0,n_col) ; 
-
+  
+  double *input_row = new double[1+n_col];
   for (int i_row=1; i_row<=n_row; i_row++){
-      double input_row[1+n_col] ;         // The first zero is for matrix form
-      input_row[0] = 0 ;
+      input_row[0] = 0 ; // The first zero is for matrix form
       for (int j=1; j<=n_col; j++){
           input_row[j] = A(i_row,j) ;
       }
       add_constraint(lp, input_row, LE, b(i_row)) ;
   }
-  double input_obj[1+n_col];    // The first zero is for matrix form
+  delete [] input_row;
+  
+  double *input_obj = new double[1+n_col];    // The first zero is for matrix form
   input_obj[0] = 0 ;
   for (int j=1; j<=n_col; j++){
       input_obj[j] = 1 ;
   }
   set_obj_fn(lp, input_obj) ;
+  delete [] input_obj;
   set_verbose(lp, IMPORTANT); // NEUTRAL (0), IMPORTANT (3), NORMAL (4), FULL (6)
   bool is_feasible = (solve(lp)==0); // 0: feasible solution found,  2: not found
                                      // solution for minimizing objective function                               
@@ -368,9 +392,11 @@ int CFeasibilityMap::s_to_tau_fn( ColumnVector &s_i ){
 ColumnVector CFeasibilityMap::get_feasible_tau(CData &Data) {
   ColumnVector list_feasible_type2(Data.n_tau); 
   for (int i_tau = 1; i_tau <=Data.n_tau; i_tau++){
-		if (i_tau%1000000==0) {
+		if (i_tau%10000000==0) {
 			double Prog = 100.00 * i_tau / Data.n_tau ; 
-			printf("progress = %.2f percent \n",Prog) ; 
+			int Prog_int = Prog ; // Changed
+			Rprintf( "progress = %d percent\n");
+			// Changed
 		}
     ColumnVector s_i = tau_to_s_fn(i_tau, Data.n_var);
     list_feasible_type2(i_tau) = Data.get_feasible_tau(s_i); 
@@ -521,15 +547,13 @@ int CFeasibilityMap::EvaluateMove(int i_original, CData &Data, ColumnVector &s_i
 	
   
 	if ( isMoveOption_q.sum() == 0 ){
-		cout << "Check: case_i(i) > 0 but isMoveOption_q.sum() == 0 " << endl ;
-		cout << "iter= " << iter << ",";
-		cout << "i= " << i_original << "," ;
-		cout << "s_i= " << endl;;
+		Rprintf( "Check: case_i(i) > 0 but isMoveOption_q.sum() == 0 \n");
+		Rprintf( "iter= %d, i= %d, s_j= \n",iter,i_original);
 		for (int j_temp=1; j_temp<=Data.n_var; j_temp++){
-			cout << " " << s_i(j_temp);
+			Rprintf( " %d",(int)s_i(j_temp));
 		}
-		cout << endl;
-		cout << " tau_i= " << s_to_tau_fn(s_i) << endl;
+		Rprintf( "\n");
+		Rprintf( "tau_i =%d\n",s_to_tau_fn(s_i));
 	}  
 
 	g_mode_q = 1.0/(isMoveOption_q.sum()) ;
@@ -557,16 +581,17 @@ bool CFeasibilityMap::SolveLP(Matrix & A, ColumnVector &b, bool domax) {
   int n_row = A.nrows(); int n_col = A.ncols();
   lp = make_lp(0,n_col) ; 
 
+  double *input_row = new double[1+n_col];
   for (int i_row=1; i_row<=n_row; i_row++){
-      double input_row[1+n_col] ;         // The first zero is for matrix form
       input_row[0] = 0 ;
       for (int j=1; j<=n_col; j++){
           input_row[j] = A(i_row,j) ;
       }
       add_constraint(lp, input_row, LE, b(i_row)) ;
   }
+  delete [] input_row;
   // we don't even need an objective function !!
-  double input_obj[1+n_col];    // The first zero is for matrix form
+  double *input_obj = new double[1+n_col];    // The first zero is for matrix form
   input_obj[0] = 0 ;
   for (int j=1; j<=n_col; j++){
       input_obj[j] = 1 ;
@@ -575,6 +600,7 @@ bool CFeasibilityMap::SolveLP(Matrix & A, ColumnVector &b, bool domax) {
   if (domax) {
     set_maxim(lp);
   }
+  delete [] input_obj;
   set_verbose(lp, IMPORTANT); // NEUTRAL (0), IMPORTANT (3), NORMAL (4), FULL (6)
   bool is_feasible = (solve(lp)==0); // 0: feasible solution found,  2: not found
   	                                 // solution for minimizing objective function
@@ -587,31 +613,36 @@ bool CFeasibilityMap::SolveLP(Matrix &A, ColumnVector &b) {
   int n_row = A.nrows(); int n_col = A.ncols();
   lp = make_lp(0,n_col) ; 
 
+  double *input_row = new double[1+n_col];
   for (int i_row=1; i_row<=n_row; i_row++){
-      double input_row[1+n_col] ;         // The first zero is for matrix form
       input_row[0] = 0 ;
       for (int j=1; j<=n_col; j++){
           input_row[j] = A(i_row,j) ;
       }
       add_constraint(lp, input_row, LE, b(i_row)) ;
   }
+  delete [] input_row;
   
-  
-  double input_obj[1+n_col];    // The first zero is for matrix form
+  double *input_obj = new double[1+n_col];    // The first zero is for matrix form
   input_obj[0] = 0 ;
   for (int j=1; j<=n_col; j++){
       input_obj[j] = 1 ;
   }
   set_obj_fn(lp, input_obj) ;
+  delete [] input_obj;
   set_verbose(lp, IMPORTANT); // NEUTRAL (0), IMPORTANT (3), NORMAL (4), FULL (6)
   bool is_feasible = (solve(lp)==0); // 0: feasible solution found,  2: not found
 		                                 // solution for minimizing objective function
 	delete_lp(lp);
+
   return is_feasible;
 }
 
 int CFeasibilityMap::count_x_out_fn(CData &Data,int i_tau, int i_original,int n_simul, Uniform &randUnif) {
-  double case2_count_out = 0;
+	
+  // double case2_count_out = 0;
+	int case2_count_out = 0; // Changed by Hang on 5/16/2015
+	
   ColumnVector s_i = tau_to_s_fn( i_tau, Data.n_var );   
   ColumnVector item_by_joint = Data.copy_non_balance_edit(s_i);
   ColumnVector tilde_y_i = Data.log_D_Observed.row(i_original).t();
@@ -627,17 +658,19 @@ int CFeasibilityMap::count_x_out_fn(CData &Data,int i_tau, int i_original,int n_
 	
 			ColumnVector x_q = exp_ColumnVector(y_q) ;
       Data.update_full_x_for_balance_edit(x_q);
-      if (!Data.PassEdits(x_q)) { case2_count_out += 1.0;} 
+			// if (!Data.PassEdits(x_q)) { case2_count_out += 1.0;}
+      if (!Data.PassEdits(x_q)) { case2_count_out += 1;}  // Changed by Hang on 5/16/2015
 	} 
   if (case2_count_out ==0) {
     case2_count_out = 1;
   }
-
+	return case2_count_out; // ADDED by Hang on 5/16/2015
 }
+
 int CFeasibilityMap::Map_count_x_out_fn(int i_tau, int i_original,int n_simul, Uniform &randUnif) {
   if (!useMap) {
     //should not be called
-    printf("Map_count_x_out_fn should not be called in non-map mode\n"); 
+	Rprintf( "Map_count_x_out_fn should not be called in non-map mode\n");
     return 0;//which will cause an error (segment fault)
   } else {
   	static int MAX_MAP_SIZE_FN2 = 20000;   	// WAS 20000;		//the maximum map size allowed
@@ -701,7 +734,8 @@ double CFeasibilityMap::Simulate_logUnif_case2(int i_tau, int i_original,int n_s
 void CFeasibilityMap::Simulate_logUnif_case2(int n_simul, Uniform &randUnif, CData &Data) {
   if (useMap) {return;}
   if (feasibleMap.nrows() == 0 || feasibleMap.maximum()==0) {
-    cout << "Feasibility Map need to be set or computed first" << endl;
+	  Rprintf( "Feasibility Map need to be set or computed first\n");
+
     return;
   }
   Data.logUnif_case2 =Matrix(Data.n_faulty,Data.n_tau); Data.logUnif_case2 = 0;
@@ -741,7 +775,7 @@ void CFeasibilityMap::Simulate_logUnif_case2(int n_simul, Uniform &randUnif, CDa
     	} 
     	
       if ( ((1.0*i_original/100)==(floor(1.0*i_original/100))) ){ 
-         printf("logUnif_y_tilde for i_sample= %d \n", i_original) ;  
+		   Rprintf( "logUnif_y_tilde for i_sample= %d\n",i_original);
     	}
     }
   }

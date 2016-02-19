@@ -885,8 +885,8 @@ typedef int (__WINAPI get_solutionlimit_func)(lprec *lp);
 typedef int (__WINAPI get_status_func)(lprec *lp);
 typedef char * (__WINAPI get_statustext_func)(lprec *lp, int statuscode);
 typedef long (__WINAPI get_timeout_func)(lprec *lp);
-typedef COUNTER (__WINAPI get_total_iter_func)(lprec *lp);
-typedef COUNTER (__WINAPI get_total_nodes_func)(lprec *lp);
+typedef int (__WINAPI get_total_iter_func)(lprec *lp);
+typedef int (__WINAPI get_total_nodes_func)(lprec *lp);
 typedef REAL (__WINAPI get_upbo_func)(lprec *lp, int colnr);
 typedef int (__WINAPI get_var_branch_func)(lprec *lp, int colnr);
 typedef REAL (__WINAPI get_var_dualresult_func)(lprec *lp, int index);
@@ -1399,10 +1399,10 @@ struct _lprec
   REAL      *orig_obj;          /* Unused pointer - Placeholder for OF not part of B */
   REAL      *obj;               /* Special vector used to temporarily change the OF vector */
 
-  COUNTER   current_iter;       /* Number of iterations in the current/last simplex */
-  COUNTER   total_iter;         /* Number of iterations over all B&B steps */
-  COUNTER   current_bswap;      /* Number of bound swaps in the current/last simplex */
-  COUNTER   total_bswap;        /* Number of bount swaps over all B&B steps */
+  int   current_iter;       /* Number of iterations in the current/last simplex */
+  int   total_iter;         /* Number of iterations over all B&B steps */
+  int   current_bswap;      /* Number of bound swaps in the current/last simplex */
+  int   total_bswap;        /* Number of bount swaps over all B&B steps */
   int       solvecount;         /* The number of solve() performed in this model */
   int       max_pivots;         /* Number of pivots between refactorizations of the basis */
 
@@ -1561,7 +1561,7 @@ struct _lprec
   int       bb_level;           /* Solver B&B working variable (recursion depth) */
   int       bb_maxlevel;        /* The deepest B&B level of the last solution */
   int       bb_limitlevel;      /* The maximum B&B level allowed */
-  COUNTER   bb_totalnodes;      /* Total number of nodes processed in B&B */
+  int       bb_totalnodes;      /* Total number of nodes processed in B&B */
   int       bb_solutionlevel;   /* The B&B level of the last / best solution */
   int       bb_cutpoolsize;     /* Size of the B&B cut pool */
   int       bb_cutpoolused;     /* Currently used cut pool */
@@ -2069,8 +2069,8 @@ void __EXPORT_TYPE __WINAPI set_epspivot(lprec *lp, REAL epspivot);
 REAL __EXPORT_TYPE __WINAPI get_epspivot(lprec *lp);
 
 int __EXPORT_TYPE __WINAPI get_max_level(lprec *lp);
-COUNTER __EXPORT_TYPE __WINAPI get_total_nodes(lprec *lp);
-COUNTER __EXPORT_TYPE __WINAPI get_total_iter(lprec *lp);
+int __EXPORT_TYPE __WINAPI get_total_nodes(lprec *lp);
+int __EXPORT_TYPE __WINAPI get_total_iter(lprec *lp);
 
 REAL __EXPORT_TYPE __WINAPI get_objective(lprec *lp);
 REAL __EXPORT_TYPE __WINAPI get_working_objective(lprec *lp);

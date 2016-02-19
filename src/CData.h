@@ -5,7 +5,8 @@
 
 class CData {
   public:
-	  CData(string folder); //Constructor
+		
+	  // CData(string folder); //Constructor   // Commented on 05/21/2015
     
     CData(); //Constructor
 	  ~CData(); //destructor
@@ -42,7 +43,7 @@ class CData {
     Matrix True_S_Mat;  // not used in model fitting, optional 
     
     void init();
-    void init(string folder);
+    // void init(string folder);	// Commented on 05/21/2015
     
     string fn_makefilename(string folder, string file);
     bool InitialRecordValid();
@@ -82,8 +83,8 @@ class CData {
     vector<ColumnVector> BalanceEdits;
     vector<ColumnVector> BalanceEdits_coeff; // ADDED 2/2/2015
     
-    bool ReadData();
-    bool ReadOptionalData();
+    // bool ReadData();		// Commented on 05/21/2015
+    // bool ReadOptionalData();		// Commented on 05/21/2015
     bool ReadDimInfo();
     void build_index_for_balance_edit();
     void initilize_balance_edits();

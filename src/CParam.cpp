@@ -1,8 +1,9 @@
+#include <R.h>
 #include "CData.h"
 #include "CFeasibilityMap.h"
 #include "CParam.h"
 #define LOG_2_PI 1.83787706640935
-#include <ctime>
+
 CHyperParam::CHyperParam()  {
   h_Mu=5.0;
   a_Phi=0.25;
@@ -41,7 +42,7 @@ void CParam::iterate(int iter, CData &Data, CFeasibilityMap &FM, CHyperParam &hy
   hyper.f_Sigma  = Data.n_var-Data.n_balance_edit+1;
   }
   if (K == -1) {
-    cout << "The number of components has not been set" << endl;
+	Rprintf( "The number of components has not been set\n");
     return;
   }
 
@@ -56,7 +57,8 @@ void CParam::iterate(int iter, CData &Data, CFeasibilityMap &FM, CHyperParam &hy
   /*
   diff = clock() - start;
   int msec = diff * 1000 / CLOCKS_PER_SEC;
-  cout << "s1:" << msec << endl;
+  
+  << "s1:" << msec << endl;
   start = clock();
   */
 
@@ -226,7 +228,7 @@ void CParam::init_logUnif_y_tilde(CData &Data,CFeasibilityMap &FM, Uniform &rand
   for (int i = 1; i <= Data.n_faulty; i++) {
     ColumnVector s_i = S_Mat.column(i);
     int i_original = Data.Faulty2Original[i-1];
-    double log_f_y_tilde_q = 0;
+    // double log_f_y_tilde_q = 0;  Commented by HANG on 5/16/2015
     if (FM.useMap && Data.is_case(i_original,2)) {
       logUnif_y_tilde(i) = FM.Simulate_logUnif_case2(CFeasibilityMap::s_to_tau_fn(s_i),i_original,n_simul,randUnif);
     } else {
@@ -282,7 +284,7 @@ double CParam::calculate_log_cond_norm(CData &Data, int i_original, ColumnVector
       if ( is_zero_exist == 1 ){
     	Sigma_cond_symm << V * D * V.t() ;
     	if ( msg_level >= 1 ) {
-    	  cout << "   Warning: When generating y_j from conditional normal(Mu_-j,Sigma_-j), Sigma_-j is non-positive definite because of computation precision. The eigenvalues D(j,j) smaller than 1e-9 is replaced with 1e-9, and let Sigma_-j = V D V.t()" << endl ;
+		  Rprintf( "   Warning: When generating y_j from conditional normal(Mu_-j,Sigma_-j), Sigma_-j is non-positive definite because of computation precision. The eigenvalues D(j,j) smaller than 1e-9 is replaced with 1e-9, and let Sigma_-j = V D V.t().\n");
     	}
       } //
       LSigma_cond = Cholesky(Sigma_cond_symm);
@@ -514,7 +516,7 @@ void CParam::S4_Z_out(CData &Data) {
     if (y_compact_i.maximum()>700){
       check_infinity = 1 ;
       if ( msg_level >= 1 ) {
-        cout << "   Warning: x_out from N(Mu_k,Sigma_k) > exp(700). There is no harm for convergence and inference, but the computation may get slower if you see this warning too often, e.g. every iteration" << endl ;
+		Rprintf( "   Warning: x_out from N(Mu_k,Sigma_k) > exp(700). There is no harm for convergence and inference, but the computation may get slower if you see this warning too often, e.g. every iteration\n");
       }
     }
 

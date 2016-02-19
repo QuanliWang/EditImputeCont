@@ -986,12 +986,12 @@ int __WINAPI get_max_level(lprec *lp)
   return(lp->bb_maxlevel);
 }
 
-COUNTER __WINAPI get_total_nodes(lprec *lp)
+int __WINAPI get_total_nodes(lprec *lp)
 {
   return(lp->bb_totalnodes);
 }
 
-COUNTER __WINAPI get_total_iter(lprec *lp)
+int __WINAPI get_total_iter(lprec *lp)
 {
   return(lp->total_iter + lp->current_iter);
 }
@@ -7983,7 +7983,7 @@ STATIC MYBOOL performiteration(lprec *lp, int rownr, int varin, LREAL theta, MYB
 
 STATIC REAL get_refactfrequency(lprec *lp, MYBOOL final)
 {
-  COUNTER iters;
+  int iters;
   int     refacts;
 
   /* Get numerator and divisor information */

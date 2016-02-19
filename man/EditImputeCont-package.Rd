@@ -3,49 +3,47 @@
 \alias{EditImputeCont}
 \docType{package}
 \title{
-Simultaneous Edit-Imputation for Continuous Microdata
+Simultaneous Edit-Imputation for Continuous Microdata Package
 }
 \description{
-More about what it does (maybe more than one line) 
-
-Hang: add description about the package here
+The package implements an integrated editing and imputation for continuous microdata under linear constraints. It relies on a Bayesian nonparametric hierarchical modeling approach in which the joint distribution of the data is estimated by a flexible joint probability model. The generated edit-imputed data are guaranteed to satisfy all imposed edit rules, whose types include ratio edits, balance edits and range restrictions.
 }
 \details{
 \tabular{ll}{
 Package: \tab EditImputeCont\cr
 Type: \tab Package\cr
-Version: \tab 1.0.0\cr
-Date: \tab 2014-12-29\cr
-License: \tab GPL(>= 3)\cr
+License: \tab GPL (>= 3)\cr
 }
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
 }
 \author{
 Quanli Wang, Hang J. Kim, Jerome P. Reiter, Lawrence H. Cox and Alan F. Karr
 
-Maintainer: Quanli Wang <quanli@stat.duke.edu>
+Maintainer: Quanli Wang <quanli@stat.duke.edu> and Hang J. Kim <hangkim0@gmail.com>
 }
 \references{
-Hang J. Kim, Lawrence H. Cox, Alan F. Karr,Jerome P. Reiterand Quanli Wang. "Simultaneous Edit-Imputation for Continuous Microdata", JASA, to appear.
+Hang J. Kim, Lawrence H. Cox, Alan F. Karr, Jerome P. Reiter and Quanli Wang (2015). "Simultaneous Edit-Imputation for Continuous Microdata", Journal of the American Statistical Association, DOI: 10.1080/01621459.2015.1040881, forthcoming.
 }
+\seealso{\code{\link{readData}}, \code{\link{createModel}}, \code{\link{multipleEI}}} 
 
-\keyword{ package}
+\keyword{package}
 
 \examples{
 library(EditImputeCont)
-#Use toy example for package testing
-data(BabyEdit)
-#Create the model object using toy example data, which has one balance edit
-#The model will be fittined with 15 DP components
-model <- new(bei,D_obs,Edit,logB,1,15)
 
-#The following three lines allow most model initilization steps to be skipped
-model$SetInitialSandD(Optional.data$init_S, Optional.data$init_D)
-model$FeasibilityMap = Optional.data$FM
-model$Log.Uniform.Compact <- Optional.data$log.uniform
+## read the toy example data, which has two ratio edits and a balance edit
+data(SimpleEx)
+data1 = readData(Y.original=SimpleEx$D.obs, ratio=SimpleEx$Ratio.edit, 
+	range=NULL, balance=SimpleEx$Balance.edit)
 
-model$Run(10) #Run  10 iterations
-#View(model$ImputedX.Compact)
+## create and initialize the model with 15 DP mixture components
+model1 = createModel(data.obj=data1, K=15)
 
+## Run an iteration of MCMC
+
+# model1$Iterate()
+
+# dim(model1$Y.edited)
+## [1]   1000   4  # Edit-imputed datasets of n=1000 records with p=4 variables
+
+## Please see the example in the demo folder for more detailed explanation
 }

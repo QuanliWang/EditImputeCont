@@ -37,7 +37,7 @@ class CFeasibilityMap {
     int EvaluateMove(int i_original, CData &Data, ColumnVector &s_i, int iter, int &what_type_move, 
     double &g_option_q, double &g_mode_q, bool SampleMove);
     int test_feasible_test_fn(CData &Data, ColumnVector &x_tilde_i, ColumnVector &s_i);
-    void test(CData &Data);
+    // void test(CData &Data);	// Commented on 05/21/2015
     MapManager* pmm;
     
   private:

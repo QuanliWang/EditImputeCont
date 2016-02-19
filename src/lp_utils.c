@@ -1,5 +1,5 @@
 #define CODE_lp_utils
-
+#include <R.h>
 #include <string.h>
 #include "commonlib.h"
 #include "lp_lib.h"
@@ -615,12 +615,17 @@ STATIC void chsign_bounds(REAL *lobound, REAL *upbound)
 STATIC REAL rand_uniform(lprec *lp, REAL range)
 {
   static MYBOOL randomized = FALSE;
-
+/*
   if(!randomized) {
     srand((unsigned) time( NULL ));
     randomized = TRUE;
   }
-  range *= (REAL) rand() / (REAL) RAND_MAX;
+  */
+  GetRNGstate();
+  range *= (REAL)unif_rand(); 
+  PutRNGstate(); 
+  //range *= (REAL) rand() / (REAL) RAND_MAX;
+  Rprintf("srand is called\n");
   return( range );
 }
 

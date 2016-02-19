@@ -1,5 +1,8 @@
-#ifndef SpecialDistributionsH
-#define SpecialDistirbutionsH
+// #ifndef SpecialDistributionsH
+// #define SpecialDistirbutionsH
+
+#ifndef CSpecialFnH   // HANG changed this on May 16, 2015
+#define CSpecialFnH
 
 #ifdef use_namespace
 using namespace RBD_LIBRARIES;

@@ -8,7 +8,7 @@ class CBE {
   Rcpp::NumericMatrix S_, Rcpp::NumericMatrix D_);*/
 	  ~CBE(); //destructor
     
-    void InitlizeSandD();
+    void InitializeSandD();
     void SetInitialSandD(Rcpp::NumericMatrix S_, Rcpp::NumericMatrix D_);
     
     void BuildMap();
@@ -38,7 +38,7 @@ class CBE {
     bool GetUseMap();
     
     void Iterate();
-    void test();
+    // void test();
     void Run(int iter);
     
     Rcpp::NumericMatrix GetX();
@@ -60,6 +60,7 @@ class CBE {
     
     void SetOptionalData(Rcpp::List OData);
     
+    Rcpp::NumericMatrix GetDobs();
     
   private:
     Matrix Rcpp2Mat(Rcpp::NumericMatrix X_);
