@@ -10,6 +10,6 @@ License: GPL (>= 3)
 Depends: Rcpp (>= 0.11.5), methods, editrules, graphics, utils
 LinkingTo: Rcpp
 RcppModules: cbei
+URL: http://www.tandfonline.com/doi/abs/10.1080/01621459.2015.1040881,https://github.com/QuanliWang/EditImputeCont
 NeedsCompilation: yes
 Repository: CRAN
-
