@@ -52,10 +52,10 @@ void CParam::iterate(int iter, CData &Data, CFeasibilityMap &FM, CHyperParam &hy
   }
   //clock_t start = clock(), diff;
 
-  if ( msg_level >= 2 ) cout << "iter=" << iter << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "iter=" << iter << endl ; // Ver 1.1.0
     
   // S1. // vector_r
-  if ( msg_level >= 2 ) cout << "S1" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S1" << endl ; // Ver 1.1.0
   S1(iter, randUnif, Data, FM, n_simul);
   /*
   diff = clock() - start;
@@ -66,25 +66,25 @@ void CParam::iterate(int iter, CData &Data, CFeasibilityMap &FM, CHyperParam &hy
   */
 
   // S2-add. // Y_in | S_i for sum(s_i) >= 2
-  if ( msg_level >= 2 ) cout << "S2_add" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S2_add" << endl ; // Ver 1.1.0
   S2_add(randUnif,Data);
 
-  if ( msg_level >= 2 ) cout << "S3_Z_in" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S3_Z_in" << endl ; // Ver 1.1.0
   S3_Z_in(Data);
   
-  if ( msg_level >= 2 ) cout << "S4_Z_out" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S4_Z_out" << endl ; // Ver 1.1.0
   S4_Z_out(Data);
 
-  if ( msg_level >= 2 ) cout << "S5_MuSigma" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S5_MuSigma" << endl ; // Ver 1.1.0
   S5_MuSigma(Data, hyper.f_Sigma,hyper.h_Mu);
   
-  if ( msg_level >= 2 ) cout << "S6_pi" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S6_pi" << endl ; // Ver 1.1.0
   S6_pi();
   
-  if ( msg_level >= 2 ) cout << "S7_alpha" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S7_alpha" << endl ; // Ver 1.1.0
   S7_alpha(hyper.a_alpha, hyper.b_alpha);
   
-  if ( msg_level >= 2 ) cout << "S8_Phi" << endl ; // Ver 1.1.0
+  // if ( msg_level >= 2 ) cout << "S8_Phi" << endl ; // Ver 1.1.0
   S8_Phi(hyper.f_Sigma, hyper.a_Phi, hyper.b_Phi);
   
 }
